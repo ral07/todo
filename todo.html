@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" href=sc.js></script>
+    <title>Список дел</title>
+    <style>
+         /* Стили для списка дел */
+    ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+    li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+    }
+    li:last-child {
+        border-bottom: none;
+    }
+    li button {
+        margin-left: 10px;
+    }
+    .done {
+        text-decoration: line-through;
+    }
+
+    /* Стили для формы и кнопок */
+    form, div {
+        margin-top: 20px;
+    }
+    input[type="text"] {
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 300px;
+    }
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: none;
+        background-color: #007bff;
+        color: #fff;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0062cc;
+    }
+
+    </style>
+</head>
+<body>
+    <h1>Список дел</h1>
+    <form id="addForm">
+        <input type="text" id="taskInput" placeholder="Введите дело">
+        <button type="submit">Добавить</button>
+    </form>
+    <div>
+        <button id="allBtn">Все</button>
+        <button id="doneBtn">Сделанные</button>
+        <button id="notDoneBtn">Несделанные</button>
+    </div>
+    <ul id="taskList"></ul>
+
+    <script>
+        const taskInput = document.getElementById('taskInput');
+const taskList = document.getElementById('taskList');
+const addForm = document.getElementById('addForm');
+const allBtn = document.getElementById('allBtn');
+const doneBtn = document.getElementById('doneBtn');
+const notDoneBtn = document.getElementById('notDoneBtn');
+
+let tasks = [];
+let filteredTasks = [];
+let filter = 'all';
+
+function renderTasks() {
+    if (filter === 'all') {
+        filteredTasks = tasks;
+    } else if (filter === 'done') {
+        filteredTasks = tasks.filter(task => task.done);
+    } else if (filter === 'notDone') {
+        filteredTasks = tasks.filter(task => !task.done);
+    }
+
+    taskList.innerHTML = '';
+    filteredTasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <span class="${task.done ? 'done' : ''}">${task.name}</span>
+            <div>
+                <button class="edit" data-index="${index}">Редактировать</button>
+                <button class="delete" data-index="${index}">Удалить</button>
+                <button class="doneBtn" data-index="${index}">${task.done ? 'Не сделано' : 'Сделано'}</button>
+            </div>
+        `;
+        taskList.appendChild(li);
+    });
+}
+
+function addTask(name) {
+    tasks.push({name: name, done: false});
+    renderTasks();
+}
+
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    renderTasks();
+}
+
+function editTask(index, newName) {
+    tasks[index].name = newName;
+    renderTasks();
+}
+
+function toggleDone(index) {
+    tasks[index].done = !tasks[index].done;
+    renderTasks();
+}
+
+addForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const task = taskInput.value.trim();
+    if (task) {
+        addTask(task);
+        taskInput.value = '';
+    }
+});
+
+taskList.addEventListener('click', (event) => {
+    const target = event.target;
+    if (target.classList.contains('delete')) {
+        const index = target.dataset.index;
+        deleteTask(index);
+    } else if (target.classList.contains('edit')) {
+        const index = target.dataset.index;
+        const task = tasks[index];
+        const newName = prompt('Введите новое название дела', task.name);
+        if (newName && newName.trim()) {
+            editTask(index, newName.trim());
+        }
+    } else if (target.classList.contains('doneBtn')) {
+        const index = target.dataset.index;
+        toggleDone(index);
+    }
+});
+
+allBtn.addEventListener('click', () => {
+    filter = 'all';
+    renderTasks();
+});
+
+doneBtn.addEventListener('click', () => {
+    filter = 'done';
+    renderTasks();
+});
+
+notDoneBtn.addEventListener('click', () => {
+    filter = 'notDone';
+    renderTasks();
+});
+
+renderTasks();
+ </script>
+</body>
+</html>
